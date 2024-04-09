@@ -1,0 +1,445 @@
+Aula 07
+
+18:11 
+Entrou no BandaMapping.cs alterou os tamanhos das colunas
+
+18:38 
+>> Clica com o direito em cima da solu��o open folder in file explorer pra pegar o endere�o
+>> cmd C:\Users\brlim\source\repos\SpotifyLikeInfnet
+>> dotnet ef migrations add AlterTable -s C:\Users\brlim\source\repos\SpotifyLikeInfnet\SpotifyLike.Api\SpotifyLike.Api.csproj -p C:\Users\brlim\source\repos\SpotifyLikeInfnet\SpotifyLike.Repository\SpotifyLike.Repository.csproj     
+
+19:25 
+Update database
+>> dotnet ef database update -s C:\Users\brlim\source\repos\SpotifyLikeInfnet\SpotifyLike.Api\SpotifyLike.Api.csproj -p C:\Users\brlim\source\repos\SpotifyLikeInfnet\SpotifyLike.Repository\SpotifyLike.Repository.csproj     
+
+21:16
+Inserir o plano 
+Direito emcima da tabela plano Show Table Data Inserir um plano pegar o guid pelo Swagger	
+
+22:05
+Criar um usuario pelo swagger post api/user
+        {
+          "nome": "Bruno",
+          "email": "bruno@example.com",
+          "senha": "12345",
+          "dtNascimento": "2024-03-25T22:53:43.264Z",
+          "planoId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "cartao": {
+            "ativo": true,
+            "limite": 5000,
+            "numero": "6546366626661"
+          }
+        }
+
+
+27:42 
+Post/Banda
+Criou Bandas
+
+32:31
+Criando os albums
+api/banda/{id}/albums
+>> Pega o Id da banda get/banda
+
+         {
+            "id": "ff8a5fca-e5f0-4d27-bcd2-08dc4d1294f4",
+            "nome": "Taylor Swift",
+            "descricao": "Taylor Alison Swift é uma cantora, compositora, atriz, diretora e roteirista norte-americana. Suas composições narrativas, muitas vezes inspiradas pelas suas experiências pessoais, têm recebido ampla cobertura mediática e",
+            "backdrop": "https://classic.exame.com/wp-content/uploads/2023/06/GettyImages-1258411683.jpg?quality=70&strip=info&w=1024"
+          }
+
+          >> vai no post do album e insere esse id de banda
+
+          {
+          "bandaId": "ff8a5fca-e5f0-4d27-bcd2-08dc4d1294f4",
+          "nome": "The Eras Tour",
+          "musicas": [
+            {
+              "nome": "Enchanted",
+              "duracao": 260
+            },
+            {
+              "nome": "KARMA",
+              "duracao": 290
+            }
+          ]
+        }
+
+>> Não Esquecer de jogar o id da banda la em cima na requisicao onde está Required
+
+>> criei a mesma coisa para o LP
+        {
+          "bandaId": "702d8353-9389-467f-7b28-08dc4b388e40",
+          "nome": "Meteora",
+          "musicas": [
+            {
+              "nome": "Faint",
+              "duracao": 250
+            },
+            {
+              "nome": "Crawling",
+              "duracao": 210
+            }
+          ]
+        }
+
+
+>> Beatles
+
+        {
+          "bandaId": "9bd4c5a8-bf62-42b4-7b26-08dc4b388e40",
+          "nome": "Abbey Road",
+          "musicas": [
+            {
+              "nome": "Let it be",
+              "duracao": 350
+            },
+            {
+              "nome": "Yesterday",
+              "duracao": 310
+            }
+          ]
+        }
+
+39:40 - Pegar quem é a banda
+
+>> injetar pra pegar o identificador de quem é a banda
+    export class DetailBandaComponent {
+
+    idbanda='';
+
+    constructor(private route: ActivatedRoute) {
+      
+    }
+}
+
+>> cria um campo idbanda
+ idbanda='';
+
+>> injetar a rota 
+    constructor(private route: ActivatedRoute) {
+      
+        }
+
+>> Pegar um evento de inicio OnInit que é uma interface que faz na hora que inicializa o componente pegar o id da banda pra quando o cara entrar na tela ja esta com o id do componente
+
+export class DetailBandaComponent implements OnInit {
+
+    idbanda='';
+
+    constructor(private route: ActivatedRoute) {
+
+    }
+
+    ngOnInit(): void {
+        throw new Error('Método nao implementado')
+    }
+}
+
+>> Como eu já quero entrar na tela com os dados da minha banda vamos pegar esses dados:
+Pegar o id da banda dentro desse método OnInit 
+
+ ngOnInit(): void {
+
+        this.idbanda = this.route.snapshot.params["id"];
+    }
+
+>> por que ["id"] ?
+>> por que dentro do arquivo app.route.ts vc determinou a rota/url com o parametro ["id"] aqui
+
+    {
+        path: 'detail/:id',
+        component: DetailBandaComponent
+    }
+
+>> vou dar um console só pra ver se consegui pegar ele mesmo
+
+  ngOnInit(): void {
+
+        this.idbanda = this.route.snapshot.params["id"];
+        console.log(this.idbanda);
+    }
+
+
+>> rodar clica no details vai no inspecionar e peda o id
+
+>> você pode pegar vários ids, ou seja varios parametros, é só acrescentar dentro da rota
+
+>> supondo que a url seja detail/idbanda/idalbum/idmusica
+>> basta você acrescntar dentro do app.route.ts
+ficaria assim:
+    {
+        path: 'detail/:idbanda/:idalbum/:idmusica',
+        component: DetailBandaComponent
+    }
+
+>> e como pegaria dentro do do detail-banda.component.ts
+
+ ngOnInit(): void {
+
+        this.idbanda = this.route.snapshot.params["idbanda"];        
+        this.idalbum = this.route.snapshot.params["idalbum"];        
+        this.idmusica = this.route.snapshot.params["idmusica"];
+
+        console.log(this.idbanda);
+    }
+
+>> como ja pegamos o id da banda, tira ou comenta o console.log
+
+45:50 - Criar um método de pegar a banda pelo id no banda.service.ts
+
+>> Parecido com o método que pegou todas as bandas só que ao invés de voltar um arry volta só 1 banda
+
+>> o retorno tbm é diferente por que a nossa url é assim
+https://localhost:7206/api/Banda/ff8a5fca-e5f0-4d27-bcd2-08dc4d1294f4
+
+>> como no outro a gente buscava todas as bandas não precisavamos dizer o id o return desse
+é a url com o id ficando assim:
+
+  public getBandaPorId(id: string) : Observable<Banda> {
+    return this.httpClient.get<Banda>(`${this.url}/${id}`);
+ }
+ 
+ >> o $ cifrão serve pra fazer interpolação e isso não é aspas é crase pra fazer interpolação
+
+
+ 49:33
+ Pegar a banda no detail-banda.component.ts
+
+        import { Component, OnInit } from '@angular/core';
+        import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
+        import { Banda } from '../model/banda';
+        import { BandaService } from '../services/banda.service';
+
+        @Component({
+          selector: 'app-detail-banda',
+          standalone: true,
+          imports: [],
+          templateUrl: './detail-banda.component.html',
+          styleUrl: './detail-banda.component.css'
+        })
+
+
+        export class DetailBandaComponent implements OnInit {
+
+            idbanda='';
+            banda!:Banda;
+
+            constructor(private route: ActivatedRoute, private bandaService: BandaService) {
+
+            }
+
+            ngOnInit(): void {
+
+                this.idbanda = this.route.snapshot.params["id"];
+                this.bandaService.getBandaPorId(this.idbanda).subscribe(response =>{
+                  this.banda = response;
+                }); 
+                // console.log(this.idbanda);
+            }
+        }
+
+
+51:35 - Acrescentar no html do details detail-banda.component.html
+{{banda}}
+
+só pra printar no html os dados, 
+
+
+ou usar o console.log dentro de details-banda.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
+import { Banda } from '../model/banda';
+import { BandaService } from '../services/banda.service';
+
+@Component({
+  selector: 'app-detail-banda',
+  standalone: true,
+  imports: [],
+  templateUrl: './detail-banda.component.html',
+  styleUrl: './detail-banda.component.css'
+})
+
+
+export class DetailBandaComponent implements OnInit {
+
+    idbanda='';
+    banda!:Banda;
+
+    constructor(private route: ActivatedRoute, private bandaService: BandaService) {
+
+    }
+
+    ngOnInit(): void {
+
+        this.idbanda = this.route.snapshot.params["id"];
+        this.bandaService.getBandaPorId(this.idbanda).subscribe(response =>{
+          this.banda = response;
+          console.log(this.banda);
+          
+        }); 
+        // console.log(this.idbanda);
+    }
+}
+
+>> Se você quiser colocar um breakpoint na linha em que deseja debugar basta acrescentar o comando debugger
+
+ficando desta forma em details-banda.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
+import { Banda } from '../model/banda';
+import { BandaService } from '../services/banda.service';
+
+@Component({
+  selector: 'app-detail-banda',
+  standalone: true,
+  imports: [],
+  templateUrl: './detail-banda.component.html',
+  styleUrl: './detail-banda.component.css'
+})
+
+
+export class DetailBandaComponent implements OnInit {
+
+    idbanda='';
+    banda!:Banda;
+
+    constructor(private route: ActivatedRoute, private bandaService: BandaService) {
+
+    }
+
+    ngOnInit(): void {
+
+        this.idbanda = this.route.snapshot.params["id"];
+        this.bandaService.getBandaPorId(this.idbanda).subscribe(response =>{
+          debugger;
+          this.banda = response;
+          console.log(this.banda);
+          
+        }); 
+        // console.log(this.idbanda);
+    }
+}
+
+56:14
+Agora já tendo recebido o objeto é só montar a tela no html detail-banda.component.html
+
+    <span>Nome: {{banda.nome}}</span>
+    <br />
+    <span>Descrição: {{banda.descricao}}</span>
+    <img [src]="banda.backdrop">
+
+
+59:30
+Criar um get no back end para pegar todos os albuns de uma banca especifica
+dentro de bandacontroller.cs
+
+  [HttpGet("{idBanda}/albums/{id}")]
+        public IActionResult ObterAlbumPorId(Guid idBanda, Guid id)
+        {
+            var result = this._bandaService.ObterAlbum(idBanda, id);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+
+        }
+
+        [HttpGet("{idBanda}/albums/")]
+        public IActionResult ObterAlbums(Guid idBanda)
+        {
+          var result = this._bandaService.ObterAlbum(idBanda);
+
+          if (result == null)
+            return NotFound();
+
+          return Ok(result);
+
+        }
+
+
+01:00 Alterar o método do service
+
+        public AlbumDto ObterAlbumPorId(Guid idBanda, Guid id)
+        {
+            var banda = this.BandaRepository.GetById(idBanda);
+
+            if (banda == null)
+            {
+                throw new Exception("Banda não encontrada");
+            }
+
+            var album = (from x in banda.Albums
+                         select x
+                         ).FirstOrDefault(x => x.Id == id);
+
+            var result = AlbumParaAlbumDto(album);
+            result.BandaId = banda.Id;
+
+            return result;
+
+        }
+        public List<AlbumDto> ObterAlbum(Guid idBanda)
+        {
+            var banda = this.BandaRepository.GetById(idBanda);
+
+            var result = new List<AlbumDto>();
+
+            if (banda == null)
+            {
+                throw new Exception("Banda não encontrada");
+            }
+
+            foreach (var item in banda.Albums) 
+            {
+                result.Add(AlbumParaAlbumDto(item));
+            }
+
+            return result;
+        }
+
+
+
+01:05 - Acrescentar agora o GetAlbumsBanda
+    public getAlbumsBanda(id: string) : Observable{
+    
+      }
+
+
+01:05 
+Criar o Model Album
+Direito em cima de model >> new file >> album.ts
+
+export interface Banda {
+    id?:String;
+    nome?:String;
+}
+
+
+01:07
+Criar o model Musica
+Direito em cima de model >> new file >> musica.ts
+
+export interface Banda {
+    id?:String;
+    nome?:String;    
+    musica?:Musica[];
+}
+
+export interface Musica {
+    id?:String;
+    nome?:String;
+    duracao?:String;
+}
+
+
+
+
+
+
+
+
+
